@@ -1,0 +1,52 @@
+name: Build and PR Output Files
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sandbox_rust
+        uses: actions/checkout@v3
+
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build project
+        working-directory: ./hello_cargo
+        run: cargo build --release
+
+      - name: Checkout yt-bot
+        uses: actions/checkout@v3
+        with:
+          repository: zilpang/yt-bot
+          token: ${{ secrets.REPO_YT_BOT_TOKEN }}
+          path: yt-bot
+
+      - name: Copy output files to yt-bot
+        run: cp hello_cargo/target/release/hello_cargo yt-bot/test
+
+      - name: Commit changes in yt-bot
+        working-directory: yt-bot
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout -b update-output
+          git add .
+          git commit -m "Update output files from sandbox_rust build"
+          git push origin update-output
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.REPO_YT_BOT_TOKEN }}
+          repository: zilpang/yt-bot
+          branch: update-output
+          title: "Update output files from sandbox_rust build"
+          body: "This PR updates the output files generated from sandbox_rust build."
