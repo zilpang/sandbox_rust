@@ -43,10 +43,10 @@ jobs:
           git push origin update-output
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        working-directory: yt-bot
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
-          repository: zilpang/yt-bot
           branch: update-output
           title: "Update output files from sandbox_rust build"
           body: "This PR updates the output files generated from sandbox_rust build."
