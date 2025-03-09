@@ -44,8 +44,18 @@ jobs:
           name: hello_cargo
           path: .
 
+      - name: Debug - List files in target directory
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -al .
+
       - name: Copy artifact to desired location
         run: cp hello_cargo ./test/
+
+      - name: Debug - List files in target/test directory
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -al ./test/
 
       - name: Set unique branch name
         id: set_branch
