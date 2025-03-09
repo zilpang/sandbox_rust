@@ -43,7 +43,6 @@ jobs:
           git push origin update-output
 
       - name: Create Pull Request
-        working-directory: yt-bot
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
