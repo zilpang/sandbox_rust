@@ -22,30 +22,35 @@ jobs:
         working-directory: ./hello_cargo
         run: cargo build --release
 
-      - name: Checkout yt-bot
+      - name: Checkout yt-bot repo
         uses: actions/checkout@v3
         with:
           repository: zilpang/yt-bot
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
           path: yt-bot
 
-      - name: Copy output files to yt-bot
-        run: cp hello_cargo/target/release/hello_cargo yt-bot/test
+      - name: Copy output files
+        run: cp hello_cargo/target/release/hello_cargo yt-bot/test/
+
+      - name: Set unique branch name
+        id: set_branch
+        run: echo "BRANCH_NAME=update-output-${GITHUB_RUN_ID}" >> $GITHUB_ENV
 
       - name: Commit changes in yt-bot
         working-directory: yt-bot
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout -b update-output
+          git checkout -B ${{ env.BRANCH_NAME }}
           git add .
-          git commit -m "Update output files from sandbox_rust build"
-          git push origin update-output
+          git commit -m "Update output files from sandbox_rust build" || echo "No changes to commit"
+          git push --force-with-lease origin ${{ env.BRANCH_NAME }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
-          branch: update-output
+          repository: zilpang/yt-bot
+          branch: ${{ env.BRANCH_NAME }}
           title: "Update output files from sandbox_rust build"
           body: "This PR updates the output files generated from sandbox_rust build."
