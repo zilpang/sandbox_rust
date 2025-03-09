@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build_and_pr:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sandbox_rust
@@ -22,15 +22,30 @@ jobs:
         working-directory: ./hello_cargo
         run: cargo build --release
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: hello_cargo
+          path: hello_cargo/target/release/hello_cargo
+
+  create_pr:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout yt-bot repo
         uses: actions/checkout@v3
         with:
           repository: zilpang/yt-bot
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
-          path: yt-bot
 
-      - name: Copy output files
-        run: cp hello_cargo/target/release/hello_cargo yt-bot/test/
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: hello_cargo
+          path: .
+
+      - name: Copy artifact to desired location
+        run: cp hello_cargo ./test/
 
       - name: Set unique branch name
         id: set_branch
@@ -43,14 +58,13 @@ jobs:
           git config user.email "github-actions@github.com"
           git checkout -B ${{ env.BRANCH_NAME }}
           git add .
-          git commit -m "Update output files from sandbox_rust build" || echo "No changes to commit"
+          git commit -m "Update output files from build" || echo "No changes to commit"
           git push --force-with-lease origin ${{ env.BRANCH_NAME }}
 
       - name: Create Pull Request
-        working-directory: yt-bot
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
           branch: ${{ env.BRANCH_NAME }}
-          title: "Update output files from sandbox_rust build"
-          body: "This PR updates the output files generated from sandbox_rust build."
+          title: "Update output files from build"
+          body: "This PR updates the output files generated from build."
