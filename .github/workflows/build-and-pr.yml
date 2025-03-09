@@ -63,7 +63,9 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.REPO_YT_BOT_TOKEN }}
+          commit-message: update output files
+          title: Update output files from build
+          body: This PR updates the output files generated from build.
           branch: ${{ env.BRANCH_NAME }}
-          title: "Update output files from build"
-          body: "This PR updates the output files generated from build."
+          base: main
+          token: ${{ secrets.REPO_YT_BOT_TOKEN }}
