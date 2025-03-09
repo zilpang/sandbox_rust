@@ -61,15 +61,6 @@ jobs:
         id: set_branch
         run: echo "BRANCH_NAME=update-output-${GITHUB_RUN_ID}" >> $GITHUB_ENV
 
-      - name: Commit changes in yt-bot
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout -B ${{ env.BRANCH_NAME }}
-          git add .
-          git commit -m "Update output files from build" || echo "No changes to commit"
-          git push --force-with-lease origin ${{ env.BRANCH_NAME }}
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
