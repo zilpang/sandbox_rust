@@ -47,10 +47,10 @@ jobs:
           git push --force-with-lease origin ${{ env.BRANCH_NAME }}
 
       - name: Create Pull Request
+        working-directory: yt-bot
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.REPO_YT_BOT_TOKEN }}
-          repository: zilpang/yt-bot
           branch: ${{ env.BRANCH_NAME }}
           title: "Update output files from sandbox_rust build"
           body: "This PR updates the output files generated from sandbox_rust build."
